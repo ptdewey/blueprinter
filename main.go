@@ -18,7 +18,6 @@ func main() {
 	items := data.GetItems(cfg.TemplateSources)
 
 	m := model.Model{
-		// TODO: change delegate to not use default styles
 		List:            list.New(items, list.NewDefaultDelegate(), 0, 0),
 		TemplateSources: cfg.TemplateSources,
 	}

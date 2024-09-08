@@ -69,7 +69,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	case tea.WindowSizeMsg:
-		h, v := ui.DocStyle.GetFrameSize()
+		h, v := ui.BlueprinterStyle.GetFrameSize()
 		m.List.SetSize(msg.Width-h, msg.Height-v)
 	}
 
@@ -80,5 +80,5 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-	return ui.DocStyle.Render(m.List.View())
+	return ui.BlueprinterStyle.Render(m.List.View())
 }
