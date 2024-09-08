@@ -4,33 +4,38 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
 type BlueprinterConfig struct {
 	TemplateSources []string `json:"template-sources"`
 }
 
-func ParseConfig(filepath string) (BlueprinterConfig, error) {
-	contents, err := os.ReadFile(filepath)
+func ParseConfig(configPath string) BlueprinterConfig {
+	contents, err := os.ReadFile(configPath)
 	if err != nil {
-		return BlueprinterConfig{}, err
+		return defaultConfig()
 	}
 
 	var cfg BlueprinterConfig
 	if err = json.Unmarshal(contents, &cfg); err != nil {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			fmt.Println("Error getting user home directory: ", err)
-			return BlueprinterConfig{}, err
-		}
-
-		// TODO: maybe check if default directories exist
-		return BlueprinterConfig{
-			TemplateSources: []string{home + "/Templates"},
-		}, nil
+		return defaultConfig()
 	}
 
-	// TODO: check if '~/' was used in template-sources and replace with '$HOME'
+	return cfg
+}
 
-	return cfg, nil
+func defaultConfig() BlueprinterConfig {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		panic(fmt.Sprintf("Error getting user home directory: %s\n", err))
+	}
+
+	// TODO: maybe check if default directory exists
+	// - other templates could be "~/templates", "~/Documents/Templates", or "~/Documents/templates"
+	return BlueprinterConfig{
+		TemplateSources: []string{
+			filepath.Join(home, "Templates"),
+		},
+	}
 }

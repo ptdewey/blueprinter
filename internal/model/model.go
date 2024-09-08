@@ -1,10 +1,12 @@
 package model
 
 import (
+	"blueprinter/internal/data"
 	"blueprinter/internal/handler"
 	"blueprinter/internal/ui"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
@@ -36,31 +38,35 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case "enter":
 			selectedItem := m.List.SelectedItem()
-			if selectedItem != nil {
-				// TODO: get full path to selected item
-				// - might need to do this via a config file or cli flags (both?)
-				// - the selectedItem type is not modifiable, and it only provides means to get the filter key
+			if selectedItem == nil {
+				return m, nil
+			}
 
-				var dst string
-				if len(os.Args) < 2 {
-					dst = "./" + selectedItem.FilterValue()
-				} else {
-					dst = os.Args[1] + selectedItem.FilterValue()
-				}
+			item, ok := selectedItem.(data.Item)
+			if !ok {
+				fmt.Println("Error: could not type assert to data.Item")
+				return m, nil
+			}
 
-				// CHANGE: replace this with non-hardcoded version
-				// FIX: figure out how to iterate through all template sources
-				src := fmt.Sprintf("%s/%s", m.TemplateSources[0], selectedItem.FilterValue())
-				_, err := handler.CopySelectedItem(src, dst)
+			var dst string
+			if len(os.Args) < 2 {
+				cwd, err := os.Getwd()
 				if err != nil {
-					fmt.Println("Error copying selected item:", err)
+					fmt.Println("Error getting current working directory: ", err)
 					return m, nil
 				}
 
-				return m, tea.Quit
+				dst = filepath.Join(cwd, item.Title())
+			} else {
+				dst = filepath.Join(os.Args[1], item.Title())
 			}
 
-			return m, nil
+			if err := handler.CopySelectedItem(item.Path(), dst); err != nil {
+				fmt.Println("Error copying selected item:", err)
+				return m, nil
+			}
+
+			return m, tea.Quit
 		}
 	case tea.WindowSizeMsg:
 		h, v := ui.DocStyle.GetFrameSize()

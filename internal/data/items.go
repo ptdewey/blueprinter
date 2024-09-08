@@ -1,14 +1,37 @@
 package data
 
 import (
-	"blueprinter/internal/ui"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/charmbracelet/bubbles/list"
 )
 
-// TODO: allow alternative search options (possibly search by file type?w)
+// TODO: add file extension (ext) to item (to allow filtering by ft?)
+type Item struct {
+	title string
+	desc  string
+	path  string
+}
+
+func (i Item) Title() string {
+	return i.title
+}
+
+func (i Item) Description() string {
+	return i.desc
+}
+
+func (i Item) FilterValue() string {
+	return i.title
+}
+
+func (i Item) Path() string {
+	return i.path
+}
+
+// TODO: allow alternative search options (possibly search by file type?)
 func getDirContents(dir string) ([]list.Item, error) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
@@ -25,14 +48,16 @@ func getDirContents(dir string) ([]list.Item, error) {
 
 		var t string
 		if entry.IsDir() {
-			t = "dir "
+			t = "d"
 		} else {
-			t = "file"
+			// TODO: show file extension rather than 'f'?
+			t = "f"
 		}
 
-		out[i] = ui.Item{
-			Name: entry.Name(),
-			Desc: fmt.Sprintf("Type: %s | Size: %d bytes | Mode: %s \n", t, info.Size(), info.Mode()),
+		out[i] = Item{
+			title: entry.Name(),
+			desc:  fmt.Sprintf("Type: %s | Mode: %s | Size: %d bytes\n", t, info.Mode(), info.Size()),
+			path:  filepath.Join(dir, entry.Name()),
 		}
 	}
 
