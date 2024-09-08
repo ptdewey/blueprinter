@@ -9,12 +9,6 @@ import (
 )
 
 // TODO: allow alternative search options (possibly search by file type?w)
-
-// TODO: get items from target directory (search subdirectories?)
-// - allow both directories and files to be targeted by copy operation
-// - allow creating a project from an entire subdir, but also allow searching subdirs
-//   - if only one is possible, go with copy entire dir (for presentations and template projects)
-//   - if both are possible, probably make subdir search opt-in for certain dirs (i.e. python, R dirs, whereas go would want entire dir copied)
 func getDirContents(dir string) ([]list.Item, error) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
@@ -45,10 +39,16 @@ func getDirContents(dir string) ([]list.Item, error) {
 	return out, nil
 }
 
-func GetItems() []list.Item {
-	out, err := getDirContents("/home/patrick/dotfiles/templates")
-	if err != nil {
-		return nil
+func GetItems(templateSources []string) []list.Item {
+	var out []list.Item
+	for _, src := range templateSources {
+		items, err := getDirContents(src)
+		if err != nil {
+			return nil
+		}
+		for _, item := range items {
+			out = append(out, item)
+		}
 	}
 
 	return out

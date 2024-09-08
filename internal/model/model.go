@@ -1,6 +1,7 @@
 package model
 
 import (
+	"blueprinter/internal/handler"
 	"blueprinter/internal/ui"
 	"fmt"
 	"os"
@@ -10,7 +11,8 @@ import (
 )
 
 type Model struct {
-	List list.Model
+	List            list.Model
+	TemplateSources []string
 }
 
 func (m Model) Init() tea.Cmd {
@@ -33,33 +35,30 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 		case "enter":
-			if m.List.FilterState() == list.Filtering {
-				m.List.ResetFilter()
-			}
-
 			selectedItem := m.List.SelectedItem()
 			if selectedItem != nil {
 				// TODO: get full path to selected item
 				// - might need to do this via a config file or cli flags (both?)
 				// - the selectedItem type is not modifiable, and it only provides means to get the filter key
 
-				fmt.Println(selectedItem.FilterValue())
-
 				var dst string
 				if len(os.Args) < 2 {
-					dst = "./"
+					dst = "./" + selectedItem.FilterValue()
 				} else {
-					dst = os.Args[1]
+					dst = os.Args[1] + selectedItem.FilterValue()
 				}
-				fmt.Println(dst) // TODO: remove this
 
-				// handler.CopySelected(src, dst)
+				// CHANGE: replace this with non-hardcoded version
+				// FIX: figure out how to iterate through all template sources
+				src := fmt.Sprintf("%s/%s", m.TemplateSources[0], selectedItem.FilterValue())
+				_, err := handler.CopySelectedItem(src, dst)
+				if err != nil {
+					fmt.Println("Error copying selected item:", err)
+					return m, nil
+				}
 
-				// TODO: figure out how to write copied file path to stdout
-
-				// return m, tea.Quit
+				return m, tea.Quit
 			}
-			// TODO: maybe do something besides quit in case of no selected item?
 
 			return m, nil
 		}
@@ -70,6 +69,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	var cmd tea.Cmd
 	m.List, cmd = m.List.Update(msg)
+
 	return m, cmd
 }
 
