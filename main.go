@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	cfg := config.ParseConfig("blueprinter.json")
+	cfg := config.ParseConfig()
 
 	items := data.GetItems(cfg.TemplateSources)
 
