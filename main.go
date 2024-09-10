@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"blueprinter/internal/config"
-	"blueprinter/internal/data"
-	"blueprinter/internal/model"
+	"github.com/ptdewey/blueprinter/internal/config"
+	"github.com/ptdewey/blueprinter/internal/data"
+	"github.com/ptdewey/blueprinter/internal/model"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"

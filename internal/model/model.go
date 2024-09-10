@@ -1,12 +1,13 @@
 package model
 
 import (
-	"blueprinter/internal/data"
-	"blueprinter/internal/handler"
-	"blueprinter/internal/ui"
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/ptdewey/blueprinter/internal/data"
+	"github.com/ptdewey/blueprinter/internal/handler"
+	"github.com/ptdewey/blueprinter/internal/ui"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"

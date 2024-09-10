@@ -1,4 +1,4 @@
-module blueprinter
+module github.com/ptdewey/blueprinter
 
 go 1.22.5
 
