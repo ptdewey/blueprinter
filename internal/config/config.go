@@ -102,7 +102,7 @@ func findGitRoot() (string, error) {
 
 	out, err := cmd.Output()
 	if err != nil {
-		fmt.Println("Error:", err)
+		// not in git repository
 		return "", err
 	}
 
