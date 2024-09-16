@@ -10,10 +10,11 @@ import (
 )
 
 type Item struct {
-	title string
-	desc  string
-	path  string
-	ext   string
+	title      string
+	desc       string
+	path       string
+	ext        string
+	outputName string
 }
 
 func (i Item) Title() string {
@@ -37,6 +38,10 @@ func (i Item) Ext() string {
 	return i.ext
 }
 
+func (i Item) OutputName() string {
+	return i.outputName
+}
+
 func GetItems(templateSources []string) []list.Item {
 	var out []list.Item
 	for _, src := range templateSources {
@@ -56,6 +61,8 @@ func getDirContents(dir string) ([]list.Item, error) {
 		return nil, err
 	}
 
+	blueprint := blueprint{}
+
 	var out []list.Item
 	for _, entry := range entries {
 		info, err := entry.Info()
@@ -66,7 +73,15 @@ func getDirContents(dir string) ([]list.Item, error) {
 
 		ext := filepath.Ext(entry.Name())
 
-		// TODO: allow some sort of autonaming of output determined from some config info/file? (i.e. for gitignore-blueprints, save as .gitignore)
+		// read hidden blueprint file in directory if it exists
+		if strings.Contains(entry.Name(), ".blueprint.json") {
+			blueprint, err = parseBlueprint(filepath.Join(dir, ".blueprint.json"))
+			if err != nil {
+				fmt.Println("Error parsing .blueprint.json: ", err)
+			}
+			continue
+		}
+
 		var t string
 		if entry.IsDir() {
 			if strings.HasSuffix(entry.Name(), "blueprints") {
@@ -85,10 +100,11 @@ func getDirContents(dir string) ([]list.Item, error) {
 		}
 
 		out = append(out, Item{
-			title: entry.Name(),
-			desc:  fmt.Sprintf("Type: %s | Mode: %s | Size: %d bytes\n", t, info.Mode(), info.Size()),
-			path:  filepath.Join(dir, entry.Name()),
-			ext:   ext,
+			title:      entry.Name(),
+			desc:       fmt.Sprintf("Type: %s | Mode: %s | Size: %d bytes\n", t, info.Mode(), info.Size()),
+			path:       filepath.Join(dir, entry.Name()),
+			ext:        ext,
+			outputName: blueprint.OutputName,
 		})
 	}
 

@@ -28,7 +28,7 @@ var (
 )
 
 type BlueprinterConfig struct {
-	TemplateSources []string `json:"template-sources"`
+	TemplateSources []string `json:"templateSources"`
 }
 
 func ParseConfig() BlueprinterConfig {

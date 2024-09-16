@@ -45,7 +45,8 @@ To specify an output location, add an argument for the desired output location.
 
 ## Configuration
 
-Blueprinter reads configuration from JSON files, which specify the directories where your template files are located. If no configuration file is found, it falls back to default directories like `~/Templates` or `~/Documents/Templates`. Here's how the configuration system works:
+Blueprinter reads configuration from JSON files, which specify the directories where your template files are located. If no configuration file is found, it falls back to default directories like `~/Templates` or `~/Documents/Templates`.
+Blueprinter will treat subdirectories as copyable unless they explicitly end with "-blueprints" (i.e. "gitignore-blueprints")
 
 ### Configuration Files
 
@@ -59,11 +60,11 @@ By default, Blueprinter looks for one of the following configuration files in ei
 
 These files should contain a JSON object with a `template-sources` key, which lists the directories where your templates are stored.
 
-### Example Configuration (`blueprinter.json`)
+#### Example Configuration (`blueprinter.json`)
 
 ```json
 {
-  "template-sources": [
+  "templateSources": [
     "~/Templates",
     "~/Documents/MyCustomTemplates"
   ]
@@ -72,7 +73,7 @@ These files should contain a JSON object with a `template-sources` key, which li
 
 In this example, Blueprinter will look for templates in `~/Templates` and `~/Documents/MyCustomTemplates`.
 
-### Default Configuration
+#### Default Configuration
 
 If no configuration file is found, Blueprinter will try to use the following default directories within the user's home directory:
 
@@ -82,3 +83,18 @@ If no configuration file is found, Blueprinter will try to use the following def
 
 If one of these directories exists, it will be used as the default template source. If none of the default directories exist and no configuration file is present, Blueprinter will panic and exit with an error.
 
+
+### Additional Configuration Options
+
+When called with no arguments, blueprinter will match the filename in the directory, but there are many cases where this is likely not desired (i.e. for .gitignore files).
+To account for this, a `.blueprint.json` file(s) can be placed in the templates directory (or a "-blueprints" subdirectory) to redefine the default output name of all files within that directory or subdirectory.
+
+*Assuming the .blueprint.json file is in a directory called "gitignore-blueprints"*
+
+```json
+{
+    "outputName": ".gitignore"
+}
+```
+
+This would rename any files in our hypothetical "gitignore-blueprints" directory to `.gitignore`

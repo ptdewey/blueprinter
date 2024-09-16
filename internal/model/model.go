@@ -57,9 +57,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return m, nil
 				}
 
-				dst = filepath.Join(cwd, item.Title())
+				if item.OutputName() == "" {
+					dst = filepath.Join(cwd, item.Title())
+				} else {
+					dst = filepath.Join(cwd, item.OutputName())
+				}
 			} else {
-				dst = filepath.Join(os.Args[1], item.Title())
+				dst = os.Args[1]
 			}
 
 			if err := handler.CopySelectedItem(item.Path(), dst); err != nil {
