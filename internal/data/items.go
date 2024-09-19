@@ -47,7 +47,7 @@ func GetItems(templateSources []string) []list.Item {
 	for _, src := range templateSources {
 		items, err := getDirContents(src)
 		if err != nil {
-			return nil
+			continue
 		}
 		out = append(out, items...)
 	}
