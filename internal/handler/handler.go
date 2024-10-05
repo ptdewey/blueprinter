@@ -20,12 +20,14 @@ func CopySelectedItem(src string, dst string) error {
 			fmt.Println("Error copying directory: ", err)
 			return err
 		}
-	} else {
-		err := copyFile(src, dst)
-		if err != nil {
-			fmt.Println("Error copying file: ", err)
-			return err
-		}
+		return nil
+	}
+
+	// TODO: allow templates?
+	err = copyFile(src, dst)
+	if err != nil {
+		fmt.Println("Error copying file: ", err)
+		return err
 	}
 
 	return nil
