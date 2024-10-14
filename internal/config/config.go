@@ -34,16 +34,19 @@ type BlueprinterConfig struct {
 func ParseConfig() BlueprinterConfig {
 	configPath, err := findConfigurationFile()
 	if err != nil {
+		fmt.Println("Configuration file not found.")
 		return defaultConfig()
 	}
 
 	contents, err := os.ReadFile(configPath)
 	if err != nil {
+		fmt.Println("Error reading contents of configuration file.")
 		return defaultConfig()
 	}
 
 	var cfg BlueprinterConfig
 	if err = json.Unmarshal(contents, &cfg); err != nil {
+		fmt.Println("Error reading configuration file.")
 		return defaultConfig()
 	}
 
@@ -71,14 +74,15 @@ func findConfigurationFile() (string, error) {
 		return configPath, nil
 	}
 
+	// check within git project next if config file not found.
+	// if git root is not found, skip this step
 	gr, err := findGitRoot()
-	if err != nil {
-		return "", err
-	}
-	for _, f := range config_files {
-		configPath := filepath.Join(gr, f)
-		if checkFileExists(configPath) {
-			return configPath, nil
+	if err == nil {
+		for _, f := range config_files {
+			configPath := filepath.Join(gr, f)
+			if checkFileExists(configPath) {
+				return configPath, nil
+			}
 		}
 	}
 
@@ -103,6 +107,7 @@ func findGitRoot() (string, error) {
 	out, err := cmd.Output()
 	if err != nil {
 		// not in git repository
+		// NOTE: error handling here may be necessary
 		return "", err
 	}
 
