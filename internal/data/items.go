@@ -74,10 +74,10 @@ func getDirContents(dir string) ([]list.Item, error) {
 		ext := filepath.Ext(entry.Name())
 
 		// read hidden blueprint file in directory if it exists
-		if strings.Contains(entry.Name(), ".blueprint.json") {
-			blueprint, err = parseBlueprint(filepath.Join(dir, ".blueprint.json"))
+		if strings.Contains(entry.Name(), ".blueprint.toml") {
+			blueprint, err = parseBlueprint(filepath.Join(dir, ".blueprint.toml"))
 			if err != nil {
-				fmt.Println("Error parsing .blueprint.json: ", err)
+				fmt.Println("Error parsing .blueprint.toml: ", err)
 			}
 			continue
 		}

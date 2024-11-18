@@ -1,12 +1,13 @@
 package data
 
 import (
-	"encoding/json"
 	"os"
+
+	"github.com/BurntSushi/toml"
 )
 
 type blueprint struct {
-	OutputName string `json:"outputName"`
+	OutputName string `toml:"output_name"`
 	// TODO: add any other local config attributes
 }
 
@@ -17,7 +18,7 @@ func parseBlueprint(blueprintPath string) (blueprint, error) {
 	}
 
 	var out blueprint
-	err = json.Unmarshal(contents, &out)
+	err = toml.Unmarshal(contents, &out)
 	if err != nil {
 		return blueprint{}, err
 	}

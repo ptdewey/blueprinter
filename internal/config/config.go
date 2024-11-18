@@ -1,13 +1,14 @@
 package config
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"github.com/BurntSushi/toml"
 )
 
 var (
@@ -19,16 +20,16 @@ var (
 	}
 
 	config_files []string = []string{
-		"blueprinter.json",
-		".blueprinter.json",
+		"blueprinter.toml",
+		".blueprinter.toml",
 		".blueprinterrc",
-		".blueprinterrc.json",
-		"blueprinterrc.json",
+		".blueprinterrc.toml",
+		"blueprinterrc.toml",
 	}
 )
 
 type BlueprinterConfig struct {
-	TemplateSources []string `json:"templateSources"`
+	TemplateSources []string `toml:"templateSources"`
 }
 
 func ParseConfig() BlueprinterConfig {
@@ -45,7 +46,7 @@ func ParseConfig() BlueprinterConfig {
 	}
 
 	var cfg BlueprinterConfig
-	if err = json.Unmarshal(contents, &cfg); err != nil {
+	if err = toml.Unmarshal(contents, &cfg); err != nil {
 		fmt.Println("Error reading configuration file.")
 		return defaultConfig()
 	}
@@ -69,7 +70,7 @@ func ParseConfig() BlueprinterConfig {
 }
 
 func findConfigurationFile() (string, error) {
-	configPath := "blueprinter.json"
+	configPath := "blueprinter.toml"
 	if checkFileExists(configPath) {
 		return configPath, nil
 	}

@@ -45,30 +45,28 @@ To specify an output location, add an argument for the desired output location.
 
 ## Configuration
 
-Blueprinter reads configuration from JSON files, which specify the directories where your template files are located. If no configuration file is found, it falls back to default directories like `~/Templates` or `~/Documents/Templates`.
+Blueprinter reads configuration from TOML files, which specify the directories where your template files are located. If no configuration file is found, it falls back to default directories like `~/Templates` or `~/Documents/Templates`.
 Blueprinter will treat subdirectories as copyable unless they explicitly end with "-blueprints" (i.e. "gitignore-blueprints")
 
 ### Configuration Files
 
 By default, Blueprinter looks for one of the following configuration files in either the current Git repository root (if available) or in the home directory:
 
-- `blueprinter.json`
-- `.blueprinter.json`
+- `blueprinter.toml`
+- `.blueprinter.toml`
 - `.blueprinterrc`
-- `.blueprinterrc.json`
-- `blueprinterrc.json`
+- `.blueprinterrc.toml`
+- `blueprinterrc.toml`
 
-These files should contain a JSON object with a `template-sources` key, which lists the directories where your templates are stored.
+These files should contain an array with a `template-sources` key, which lists the directories where your templates are stored.
 
-#### Example Configuration (`blueprinter.json`)
+#### Example Configuration (`blueprinter.toml`)
 
-```json
-{
-  "templateSources": [
+```toml
+templateSources =  [
     "~/Templates",
-    "~/Documents/MyCustomTemplates"
-  ]
-}
+    "~/Documents/MyCustomTemplates",
+]
 ```
 
 In this example, Blueprinter will look for templates in `~/Templates` and `~/Documents/MyCustomTemplates`.
@@ -87,14 +85,12 @@ If one of these directories exists, it will be used as the default template sour
 ### Additional Configuration Options
 
 When called with no arguments, blueprinter will match the filename in the directory, but there are many cases where this is likely not desired (i.e. for .gitignore files).
-To account for this, a `.blueprint.json` file(s) can be placed in the templates directory (or a "-blueprints" subdirectory) to redefine the default output name of all files within that directory or subdirectory.
+To account for this, a `.blueprint.toml` file(s) can be placed in the templates directory (or a "-blueprints" subdirectory) to redefine the default output name of all files within that directory or subdirectory.
 
-*Assuming the .blueprint.json file is in a directory called "gitignore-blueprints"*
+*Assuming the .blueprint.toml file is in a directory called "gitignore-blueprints"*
 
-```json
-{
-    "outputName": ".gitignore"
-}
+```toml
+output_name = ".gitignore"
 ```
 
 This would rename any files in our hypothetical "gitignore-blueprints" directory to `.gitignore`
