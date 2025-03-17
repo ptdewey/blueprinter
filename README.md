@@ -2,11 +2,9 @@
 
 Blueprinter is a command-line tool built with Bubble Tea that allows users to browse template files and directories from configured source locations and copy them to a target destination. It provides an interactive list of available templates from which users can select, and then copy the selected item to their current working directory or a specified target directory.
 
-![Blueprinter Interface](./assets/screenshot-1.png)
+![Blueprinter Example USage](./assets/example.gif)
 
 Blueprinter allows fuzzy search and selection from files in configured template directories.
-
-![Blueprinter Filtered Interface](./assets/screenshot-2.png)
 
 
 ## Installation
