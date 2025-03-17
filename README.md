@@ -92,3 +92,35 @@ output_name = ".gitignore"
 ```
 
 This would rename any files in our hypothetical "gitignore-blueprints" directory to `.gitignore`
+
+
+(Example blueprint folder structure)
+```
+typst-blueprints
+├── .blueprint.toml
+├── conf.typ
+├── deck.typ
+└── document.typ
+```
+
+
+#### `.blueprint.toml` Specification
+
+```toml
+# Automatically rename output
+output_name = ".gitignore"
+
+# Ignore files in list construction
+ignore=["conf.typ"]
+
+# Additional configuration options for a single template (can be repeated as many times as necessary)
+[[template_config]]
+target_template="document.typ" # Template associated with config
+extra_templates=["conf.typ"] # Additional files to copy alongside a template
+extra_destinations=["conference.typ"] # Output names for extra files
+
+[[template_config]]
+target_template="deck.typ"
+extra_templates=["slide.typ"]
+```
+

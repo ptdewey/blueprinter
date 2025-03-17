@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/list"
@@ -14,7 +15,9 @@ type Item struct {
 	desc       string
 	path       string
 	ext        string
+	dirPath    string
 	outputName string
+	extras     []templateConfig
 }
 
 func (i Item) Title() string {
@@ -38,8 +41,16 @@ func (i Item) Ext() string {
 	return i.ext
 }
 
+func (i Item) DirPath() string {
+	return i.dirPath
+}
+
 func (i Item) OutputName() string {
 	return i.outputName
+}
+
+func (i Item) Extras() []templateConfig {
+	return i.extras
 }
 
 func GetItems(templateSources []string) []list.Item {
@@ -73,7 +84,7 @@ func getDirContents(dir string) ([]list.Item, error) {
 
 		ext := filepath.Ext(entry.Name())
 
-		// read hidden blueprint file in directory if it exists
+		// Read hidden blueprint file in directory if it exists
 		if strings.Contains(entry.Name(), ".blueprint.toml") {
 			blueprint, err = parseBlueprint(filepath.Join(dir, ".blueprint.toml"))
 			if err != nil {
@@ -91,7 +102,7 @@ func getDirContents(dir string) ([]list.Item, error) {
 					continue
 				}
 				out = append(out, tempOut...)
-				continue // skip adding '...blueprints' directories to output list
+				continue // Skip adding `...blueprints` directories to output list
 			} else {
 				t = "dir"
 			}
@@ -99,12 +110,20 @@ func getDirContents(dir string) ([]list.Item, error) {
 			t = ext
 		}
 
+		if len(blueprint.Ignore) > 0 {
+			if slices.Contains(blueprint.Ignore, entry.Name()) {
+				continue
+			}
+		}
+
 		out = append(out, Item{
 			title:      entry.Name(),
 			desc:       fmt.Sprintf("Type: %s | Mode: %s | Size: %d bytes\n", t, info.Mode(), info.Size()),
 			path:       filepath.Join(dir, entry.Name()),
 			ext:        ext,
+			dirPath:    dir,
 			outputName: blueprint.OutputName,
+			extras:     blueprint.Extras,
 		})
 	}
 

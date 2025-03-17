@@ -71,6 +71,34 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 
+			// Copy any extra specified template files
+			for _, et := range item.Extras() {
+				if et.TargetTemplate != item.Title() {
+					continue
+				}
+
+				cwd, err := os.Getwd()
+				if err != nil {
+					fmt.Println("Error getting current working directory: ", err)
+					return m, nil
+				}
+
+				for i, t := range et.ExtraTemplates {
+					var dst string
+					if len(et.ExtraDestinations) > i && et.ExtraDestinations[i] != "" {
+						dst = filepath.Join(cwd, et.ExtraDestinations[i])
+					} else {
+						dst = filepath.Join(cwd, t)
+					}
+
+					src := filepath.Join(item.DirPath(), t)
+					if err := handler.CopySelectedItem(src, dst); err != nil {
+						fmt.Println("Error copying additional template files for selected item:", err)
+						return m, nil
+					}
+				}
+			}
+
 			return m, tea.Quit
 		}
 	case tea.WindowSizeMsg:
