@@ -108,7 +108,7 @@ typst-blueprints
 
 ```toml
 # Automatically rename output
-output_name = ".gitignore"
+output_name = "main.typ"
 
 # Ignore files in list construction
 ignore=["conf.typ"]
