@@ -66,7 +66,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				dst = os.Args[1]
 			}
 
-			if err := handler.CopySelectedItem(item.Path(), dst); err != nil {
+			if err := handler.CopySelectedItem(item.Path(), dst, item); err != nil {
 				fmt.Println("Error copying selected item:", err)
 				return m, nil
 			}
@@ -92,7 +92,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					}
 
 					src := filepath.Join(item.DirPath(), t)
-					if err := handler.CopySelectedItem(src, dst); err != nil {
+					if err := handler.CopySelectedItem(src, dst, item); err != nil {
 						fmt.Println("Error copying additional template files for selected item:", err)
 						return m, nil
 					}

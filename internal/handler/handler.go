@@ -5,9 +5,11 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+
+	"github.com/ptdewey/blueprinter/internal/data"
 )
 
-func CopySelectedItem(src string, dst string) error {
+func CopySelectedItem(src string, dst string, item data.Item) error {
 	srcInfo, err := os.Stat(src)
 	if err != nil {
 		fmt.Println("Error getting source info: ", err)
@@ -15,7 +17,7 @@ func CopySelectedItem(src string, dst string) error {
 	}
 
 	if srcInfo.IsDir() {
-		err := copyDirectory(src, dst)
+		err := copyDirectory(src, dst, item)
 		if err != nil {
 			fmt.Println("Error copying directory: ", err)
 			return err
@@ -23,8 +25,7 @@ func CopySelectedItem(src string, dst string) error {
 		return nil
 	}
 
-	// TODO: allow templates?
-	err = copyFile(src, dst)
+	err = copyFile(src, dst, item)
 	if err != nil {
 		fmt.Println("Error copying file: ", err)
 		return err
@@ -33,12 +34,13 @@ func CopySelectedItem(src string, dst string) error {
 	return nil
 }
 
-func copyFile(src, dst string) error {
+func copyFile(src, dst string, item data.Item) error {
+	var in io.Reader
 	in, err := os.Open(src)
 	if err != nil {
 		return err
 	}
-	defer in.Close()
+	defer in.(*os.File).Close()
 
 	// TODO: this currently overwrites the file if it already exists
 	out, err := os.Create(dst)
@@ -47,6 +49,23 @@ func copyFile(src, dst string) error {
 	}
 	defer out.Close()
 
+	// TODO: allow templates?
+	for _, cfg := range item.Extras() {
+		if cfg.TargetTemplate != item.Title() {
+			continue
+		}
+
+		if !cfg.PopulateTemplate {
+			break
+		}
+
+		in, err = cfg.ExecuteTemplate(src)
+		if err != nil {
+			// NOTE: May want to break instead of returning here
+			return err
+		}
+	}
+
 	if _, err = io.Copy(out, in); err != nil {
 		return err
 	}
@@ -54,7 +73,7 @@ func copyFile(src, dst string) error {
 	return out.Sync()
 }
 
-func copyDirectory(src, dst string) error {
+func copyDirectory(src, dst string, item data.Item) error {
 	err := os.MkdirAll(dst, os.ModePerm)
 	if err != nil {
 		return err
@@ -75,7 +94,7 @@ func copyDirectory(src, dst string) error {
 			return os.MkdirAll(dstPath, info.Mode())
 		}
 
-		return copyFile(path, dstPath)
+		return copyFile(path, dstPath, item)
 	})
 
 	return err
