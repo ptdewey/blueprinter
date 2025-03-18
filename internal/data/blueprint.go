@@ -10,11 +10,12 @@ import (
 )
 
 type templateConfig struct {
-	TargetTemplate    string                 `toml:"target_template"`
-	PopulateTemplate  bool                   `toml:"populate_template"`
-	TemplateVars      map[string]interface{} `toml:"template_vars"`
-	ExtraTemplates    []string               `toml:"extra_templates"`
-	ExtraDestinations []string               `toml:"extra_destinations"`
+	TargetTemplate    string   `toml:"target_template"`
+	ExtraTemplates    []string `toml:"extra_templates"`
+	ExtraDestinations []string `toml:"extra_destinations"`
+
+	PopulateTemplate bool                   `toml:"populate_template"`
+	TemplateVars     map[string]interface{} `toml:"template_vars"`
 }
 
 // `.blueprint.toml` Specification
@@ -22,7 +23,10 @@ type blueprint struct {
 	OutputName string           `toml:"output_name"`
 	Ignore     []string         `toml:"ignore"`
 	Extras     []templateConfig `toml:"template_config"`
-	// Add any other local config attributes
+
+	// DOC: document hierarchy of vars
+	PopulateTemplates bool                   `toml:"populate_templates"` // TODO: decide if multiple template flags are necessary
+	TemplateVars      map[string]interface{} `toml:"template_vars"`
 }
 
 func (cfg *templateConfig) ExecuteTemplate(tmplPath string) (*bytes.Buffer, error) {

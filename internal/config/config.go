@@ -29,7 +29,9 @@ var (
 )
 
 type BlueprinterConfig struct {
-	TemplateSources []string `toml:"templateSources"`
+	TemplateSources   []string               `toml:"template_sources"`
+	PopulateTemplates bool                   `toml:"populate_templates"`
+	TemplateVars      map[string]interface{} `toml:"template_vars"`
 }
 
 func ParseConfig() BlueprinterConfig {

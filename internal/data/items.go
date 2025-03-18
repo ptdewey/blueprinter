@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/bubbles/list"
+	"github.com/ptdewey/blueprinter/internal/config"
 )
 
 type Item struct {
@@ -15,9 +16,10 @@ type Item struct {
 	desc       string
 	path       string
 	ext        string
-	dirPath    string
 	outputName string
-	extras     []templateConfig
+
+	dirPath string
+	extras  []templateConfig
 }
 
 func (i Item) Title() string {
@@ -41,21 +43,22 @@ func (i Item) Ext() string {
 	return i.ext
 }
 
-func (i Item) DirPath() string {
-	return i.dirPath
-}
-
 func (i Item) OutputName() string {
 	return i.outputName
+}
+
+func (i Item) DirPath() string {
+	return i.dirPath
 }
 
 func (i Item) Extras() []templateConfig {
 	return i.extras
 }
 
-func GetItems(templateSources []string) []list.Item {
+func GetItems(cfg *config.BlueprinterConfig) []list.Item {
 	var out []list.Item
-	for _, src := range templateSources {
+
+	for _, src := range cfg.TemplateSources {
 		items, err := getDirContents(src)
 		if err != nil {
 			continue

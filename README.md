@@ -61,7 +61,7 @@ These files should contain an array with a `template-sources` key, which lists t
 #### Example Configuration (`blueprinter.toml`)
 
 ```toml
-templateSources =  [
+template_sources =  [
     "~/Templates",
     "~/Documents/MyCustomTemplates",
 ]
