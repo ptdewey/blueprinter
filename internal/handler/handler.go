@@ -49,28 +49,8 @@ func copyFile(src, dst string, item data.Item) error {
 	}
 	defer out.Close()
 
-	populateFlag := false
-	var templateVars map[string]any
-	for _, cfg := range item.Extras() {
-		if cfg.TargetTemplate != item.Title() {
-			continue
-		}
-
-		if !cfg.PopulateTemplate {
-			break
-		}
-
-		populateFlag = cfg.PopulateTemplate // NOTE: this should probably be a pointer arg to allow inheriting
-		templateVars = cfg.TemplateVars
-	}
-
-	// TODO: inherit templateVars and populateFlag from higher level configuration
-	if populateFlag && templateVars != nil {
-		in, err = data.ExecuteTemplate(src, templateVars)
-		if err != nil {
-			return err
-		}
-	}
+	// Call template population handler
+	handleTemplatePopulation(&in, src, item)
 
 	if _, err = io.Copy(out, in); err != nil {
 		return err

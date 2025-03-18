@@ -15,7 +15,7 @@ import (
 func main() {
 	cfg := config.ParseConfig()
 
-	items := data.GetItems(&cfg)
+	items := data.GetItems(cfg.TemplateSources)
 
 	m := model.Model{
 		List:            list.New(items, list.NewDefaultDelegate(), 0, 0),

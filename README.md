@@ -2,7 +2,7 @@
 
 Blueprinter is a command-line tool built with Bubble Tea that allows users to browse template files and directories from configured source locations and copy them to a target destination. It provides an interactive list of available templates from which users can select, and then copy the selected item to their current working directory or a specified target directory.
 
-![Blueprinter Example USage](./assets/example.gif)
+![Blueprinter Example Usage](./assets/example.gif)
 
 Blueprinter allows fuzzy search and selection from files in configured template directories.
 
@@ -48,13 +48,7 @@ Blueprinter will treat subdirectories as copyable unless they explicitly end wit
 
 ### Configuration Files
 
-By default, Blueprinter looks for one of the following configuration files in either the current Git repository root (if available) or in the home directory:
-
-- `blueprinter.toml`
-- `.blueprinter.toml`
-- `.blueprinterrc`
-- `.blueprinterrc.toml`
-- `blueprinterrc.toml`
+By default, Blueprinter looks for a `blueprinter.toml` configuration file in either the current Git repository root (if available) or in the `~/.config/blueprinter` directory:
 
 These files should contain an array with a `template-sources` key, which lists the directories where your templates are stored.
 
@@ -65,6 +59,14 @@ template_sources =  [
     "~/Templates",
     "~/Documents/MyCustomTemplates",
 ]
+
+# Whether or not Go template vars should be populated (i.e. `{{ .author }}` -> `John Doe`)
+populate_templates = false
+
+# Map of arbitrary template variables to use for population
+# Keys can be created as desired, and can be referenced in documents with `{{ .key_name }}`
+[template_vars]
+author = "John Doe"
 ```
 
 In this example, Blueprinter will look for templates in `~/Templates` and `~/Documents/MyCustomTemplates`.
@@ -78,6 +80,8 @@ If no configuration file is found, Blueprinter will try to use the following def
 - `~/Documents/templates`
 
 If one of these directories exists, it will be used as the default template source. If none of the default directories exist and no configuration file is present, Blueprinter will panic and exit with an error.
+
+Blueprinter will not attempt to populate any Go text templates by default.
 
 
 ### Additional Configuration Options

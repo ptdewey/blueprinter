@@ -72,7 +72,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 			// Copy any extra specified template files
-			for _, et := range item.Extras() {
+			for _, et := range item.Blueprint().Extras {
 				if et.TargetTemplate != item.Title() {
 					continue
 				}
