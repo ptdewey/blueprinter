@@ -2,20 +2,28 @@ package handler
 
 import (
 	"io"
+	"time"
 
 	"github.com/ptdewey/blueprinter/internal/config"
 	"github.com/ptdewey/blueprinter/internal/data"
 	"github.com/ptdewey/blueprinter/internal/utils"
 )
 
+// NOTE: Special reserved template variables
+var templateVars = map[string]any{
+	"current_year": time.Now().Year(),
+}
+
 func handleTemplatePopulation(in *io.Reader, tmplPath string, item data.Item) error {
-	// Global level populate options
 	cfg := config.Config()
 	if !cfg.PopulateTemplates {
 		return nil
 	}
 
-	templateVars := cfg.TemplateVars
+	templateVars["filename"] = item.Title()
+
+	// Global level populate options
+	templateVars = utils.MergeMaps(templateVars, cfg.TemplateVars)
 
 	// Template directory level options
 	blueprint := item.Blueprint()

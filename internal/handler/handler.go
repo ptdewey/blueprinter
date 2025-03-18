@@ -52,7 +52,7 @@ func copyFile(src, dst string, item data.Item) error {
 	// Call template population handler
 	handleTemplatePopulation(&in, src, item)
 
-	if _, err = io.Copy(out, in); err != nil {
+	if _, err := io.Copy(out, in); err != nil {
 		return err
 	}
 
