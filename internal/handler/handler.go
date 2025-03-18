@@ -49,7 +49,8 @@ func copyFile(src, dst string, item data.Item) error {
 	}
 	defer out.Close()
 
-	// TODO: allow templates?
+	populateFlag := false
+	var templateVars map[string]any
 	for _, cfg := range item.Extras() {
 		if cfg.TargetTemplate != item.Title() {
 			continue
@@ -59,9 +60,14 @@ func copyFile(src, dst string, item data.Item) error {
 			break
 		}
 
-		in, err = cfg.ExecuteTemplate(src)
+		populateFlag = cfg.PopulateTemplate // NOTE: this should probably be a pointer arg to allow inheriting
+		templateVars = cfg.TemplateVars
+	}
+
+	// TODO: inherit templateVars and populateFlag from higher level configuration
+	if populateFlag && templateVars != nil {
+		in, err = data.ExecuteTemplate(src, templateVars)
 		if err != nil {
-			// NOTE: May want to break instead of returning here
 			return err
 		}
 	}

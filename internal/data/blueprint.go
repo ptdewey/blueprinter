@@ -2,7 +2,6 @@ package data
 
 import (
 	"bytes"
-	"fmt"
 	"os"
 	"text/template"
 
@@ -14,8 +13,8 @@ type templateConfig struct {
 	ExtraTemplates    []string `toml:"extra_templates"`
 	ExtraDestinations []string `toml:"extra_destinations"`
 
-	PopulateTemplate bool                   `toml:"populate_template"`
-	TemplateVars     map[string]interface{} `toml:"template_vars"`
+	PopulateTemplate bool           `toml:"populate_template"`
+	TemplateVars     map[string]any `toml:"template_vars"`
 }
 
 // `.blueprint.toml` Specification
@@ -25,11 +24,11 @@ type blueprint struct {
 	Extras     []templateConfig `toml:"template_config"`
 
 	// DOC: document hierarchy of vars
-	PopulateTemplates bool                   `toml:"populate_templates"` // TODO: decide if multiple template flags are necessary
-	TemplateVars      map[string]interface{} `toml:"template_vars"`
+	PopulateTemplates bool           `toml:"populate_templates"` // TODO: decide if multiple template flags are necessary
+	TemplateVars      map[string]any `toml:"template_vars"`
 }
 
-func (cfg *templateConfig) ExecuteTemplate(tmplPath string) (*bytes.Buffer, error) {
+func ExecuteTemplate(tmplPath string, templateVars map[string]any) (*bytes.Buffer, error) {
 	contents, err := os.ReadFile(tmplPath)
 	if err != nil {
 		return nil, err
@@ -41,7 +40,7 @@ func (cfg *templateConfig) ExecuteTemplate(tmplPath string) (*bytes.Buffer, erro
 	}
 
 	var out bytes.Buffer
-	if err := tmpl.Execute(&out, cfg.TemplateVars); err != nil {
+	if err := tmpl.Execute(&out, templateVars); err != nil {
 		return nil, err
 	}
 
@@ -54,8 +53,6 @@ func parseBlueprint(blueprintPath string) (blueprint, error) {
 	if err != nil {
 		return blueprint{}, err
 	}
-
-	fmt.Println(out.Extras)
 
 	return out, nil
 }
