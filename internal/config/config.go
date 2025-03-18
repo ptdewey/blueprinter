@@ -12,6 +12,8 @@ import (
 )
 
 var (
+	cfg BlueprinterConfig
+
 	template_locations []string = []string{
 		"Templates",
 		"templates",
@@ -22,17 +24,20 @@ var (
 	config_files []string = []string{
 		"blueprinter.toml",
 		".blueprinter.toml",
-		".blueprinterrc",
-		".blueprinterrc.toml",
-		"blueprinterrc.toml",
 	}
 )
 
 type BlueprinterConfig struct {
-	TemplateSources []string `toml:"templateSources"`
+	TemplateSources   []string       `toml:"template_sources"`
+	PopulateTemplates bool           `toml:"populate_templates"`
+	TemplateVars      map[string]any `toml:"template_vars"`
 }
 
-func ParseConfig() BlueprinterConfig {
+func Config() *BlueprinterConfig {
+	return &cfg
+}
+
+func ParseConfig() *BlueprinterConfig {
 	configPath, err := findConfigurationFile()
 	if err != nil {
 		fmt.Println("Configuration file not found.")
@@ -45,7 +50,6 @@ func ParseConfig() BlueprinterConfig {
 		return defaultConfig()
 	}
 
-	var cfg BlueprinterConfig
 	if err = toml.Unmarshal(contents, &cfg); err != nil {
 		fmt.Println("Error reading configuration file.")
 		return defaultConfig()
@@ -66,7 +70,7 @@ func ParseConfig() BlueprinterConfig {
 		}
 	}
 
-	return cfg
+	return &cfg
 }
 
 func findConfigurationFile() (string, error) {
@@ -75,7 +79,7 @@ func findConfigurationFile() (string, error) {
 		return configPath, nil
 	}
 
-	// check within git project next if config file not found.
+	// Check within git project next if config file not found.
 	// if git root is not found, skip this step
 	gr, err := findGitRoot()
 	if err == nil {
@@ -93,7 +97,7 @@ func findConfigurationFile() (string, error) {
 		return "", err
 	}
 	for _, f := range config_files {
-		configPath := filepath.Join(home, f)
+		configPath := filepath.Join(home, ".config", "blueprinter", f)
 		if checkFileExists(configPath) {
 			return configPath, nil
 		}
@@ -107,7 +111,7 @@ func findGitRoot() (string, error) {
 
 	out, err := cmd.Output()
 	if err != nil {
-		// not in git repository
+		// Not in git repository
 		// NOTE: error handling here may be necessary
 		return "", err
 	}
@@ -124,7 +128,7 @@ func checkFileExists(configPath string) bool {
 	return false
 }
 
-func defaultConfig() BlueprinterConfig {
+func defaultConfig() *BlueprinterConfig {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		panic(fmt.Sprintf("Error getting user home directory: %s\n", err))
@@ -136,8 +140,9 @@ func defaultConfig() BlueprinterConfig {
 			continue
 		}
 
-		return BlueprinterConfig{
-			TemplateSources: []string{dir},
+		return &BlueprinterConfig{
+			TemplateSources:   []string{dir},
+			PopulateTemplates: false,
 		}
 	}
 

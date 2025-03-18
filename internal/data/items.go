@@ -15,9 +15,10 @@ type Item struct {
 	desc       string
 	path       string
 	ext        string
-	dirPath    string
 	outputName string
-	extras     []templateConfig
+
+	dirPath   string
+	blueprint blueprint
 }
 
 func (i Item) Title() string {
@@ -41,20 +42,21 @@ func (i Item) Ext() string {
 	return i.ext
 }
 
-func (i Item) DirPath() string {
-	return i.dirPath
-}
-
 func (i Item) OutputName() string {
 	return i.outputName
 }
 
-func (i Item) Extras() []templateConfig {
-	return i.extras
+func (i Item) DirPath() string {
+	return i.dirPath
+}
+
+func (i Item) Blueprint() blueprint {
+	return i.blueprint
 }
 
 func GetItems(templateSources []string) []list.Item {
 	var out []list.Item
+
 	for _, src := range templateSources {
 		items, err := getDirContents(src)
 		if err != nil {
@@ -123,7 +125,7 @@ func getDirContents(dir string) ([]list.Item, error) {
 			ext:        ext,
 			dirPath:    dir,
 			outputName: blueprint.OutputName,
-			extras:     blueprint.Extras,
+			blueprint:  blueprint,
 		})
 	}
 

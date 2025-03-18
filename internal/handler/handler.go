@@ -49,22 +49,8 @@ func copyFile(src, dst string, item data.Item) error {
 	}
 	defer out.Close()
 
-	// TODO: allow templates?
-	for _, cfg := range item.Extras() {
-		if cfg.TargetTemplate != item.Title() {
-			continue
-		}
-
-		if !cfg.PopulateTemplate {
-			break
-		}
-
-		in, err = cfg.ExecuteTemplate(src)
-		if err != nil {
-			// NOTE: May want to break instead of returning here
-			return err
-		}
-	}
+	// Call template population handler
+	handleTemplatePopulation(&in, src, item)
 
 	if _, err = io.Copy(out, in); err != nil {
 		return err

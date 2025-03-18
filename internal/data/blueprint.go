@@ -2,7 +2,6 @@ package data
 
 import (
 	"bytes"
-	"fmt"
 	"os"
 	"text/template"
 
@@ -10,22 +9,21 @@ import (
 )
 
 type templateConfig struct {
-	TargetTemplate    string                 `toml:"target_template"`
-	PopulateTemplate  bool                   `toml:"populate_template"`
-	TemplateVars      map[string]interface{} `toml:"template_vars"`
-	ExtraTemplates    []string               `toml:"extra_templates"`
-	ExtraDestinations []string               `toml:"extra_destinations"`
+	TargetTemplate    string         `toml:"target_template"`
+	ExtraTemplates    []string       `toml:"extra_templates"`
+	ExtraDestinations []string       `toml:"extra_destinations"`
+	TemplateVars      map[string]any `toml:"template_vars"`
 }
 
 // `.blueprint.toml` Specification
 type blueprint struct {
-	OutputName string           `toml:"output_name"`
-	Ignore     []string         `toml:"ignore"`
-	Extras     []templateConfig `toml:"template_config"`
-	// Add any other local config attributes
+	OutputName   string           `toml:"output_name"`
+	Ignore       []string         `toml:"ignore"`
+	Extras       []templateConfig `toml:"template_config"`
+	TemplateVars map[string]any   `toml:"template_vars"`
 }
 
-func (cfg *templateConfig) ExecuteTemplate(tmplPath string) (*bytes.Buffer, error) {
+func ExecuteTemplate(tmplPath string, templateVars map[string]any) (*bytes.Buffer, error) {
 	contents, err := os.ReadFile(tmplPath)
 	if err != nil {
 		return nil, err
@@ -37,7 +35,7 @@ func (cfg *templateConfig) ExecuteTemplate(tmplPath string) (*bytes.Buffer, erro
 	}
 
 	var out bytes.Buffer
-	if err := tmpl.Execute(&out, cfg.TemplateVars); err != nil {
+	if err := tmpl.Execute(&out, templateVars); err != nil {
 		return nil, err
 	}
 
@@ -50,8 +48,6 @@ func parseBlueprint(blueprintPath string) (blueprint, error) {
 	if err != nil {
 		return blueprint{}, err
 	}
-
-	fmt.Println(out.Extras)
 
 	return out, nil
 }
