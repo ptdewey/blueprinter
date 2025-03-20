@@ -9,7 +9,7 @@ import (
 	"github.com/ptdewey/blueprinter/internal/data"
 )
 
-func CopySelectedItem(src string, dst string, item data.Item) error {
+func CopySelectedItem(item data.Item, src string, dst string) error {
 	srcInfo, err := os.Stat(src)
 	if err != nil {
 		fmt.Println("Error getting source info: ", err)
@@ -17,24 +17,56 @@ func CopySelectedItem(src string, dst string, item data.Item) error {
 	}
 
 	if srcInfo.IsDir() {
-		err := copyDirectory(src, dst, item)
-		if err != nil {
+		if err := copyDirectory(src, dst, item); err != nil {
 			fmt.Println("Error copying directory: ", err)
 			return err
 		}
 		return nil
 	}
 
-	err = copyFile(src, dst, item)
-	if err != nil {
+	if err := copyFile(item, src, dst); err != nil {
 		fmt.Println("Error copying file: ", err)
+		return err
+	}
+
+	if err := copyExtraItems(item); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func copyFile(src, dst string, item data.Item) error {
+func copyExtraItems(item data.Item) error {
+	for _, et := range item.Blueprint().Extras {
+		if et.TargetTemplate != item.Title() {
+			continue
+		}
+
+		cwd, err := os.Getwd()
+		if err != nil {
+			fmt.Println("Error getting current working directory: ", err)
+			return err
+		}
+
+		for i, t := range et.ExtraTemplates {
+			var dst string
+			if len(et.ExtraDestinations) > i && et.ExtraDestinations[i] != "" {
+				dst = filepath.Join(cwd, et.ExtraDestinations[i])
+			} else {
+				dst = filepath.Join(cwd, t)
+			}
+
+			src := filepath.Join(item.DirPath(), t)
+			if err := copyFile(item, src, dst); err != nil {
+				fmt.Println("Error copying additional template files for selected item:", err)
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func copyFile(item data.Item, src string, dst string) error {
 	var in io.Reader
 	in, err := os.Open(src)
 	if err != nil {
@@ -42,15 +74,17 @@ func copyFile(src, dst string, item data.Item) error {
 	}
 	defer in.(*os.File).Close()
 
-	// TODO: this currently overwrites the file if it already exists
+	// FIX: this currently overwrites the file if it already exists
+	// - Should it stop and warn the user? Config option?
 	out, err := os.Create(dst)
 	if err != nil {
 		return err
 	}
 	defer out.Close()
 
-	// Call template population handler
-	handleTemplatePopulation(&in, src, item)
+	if err := execTemplate(&in, src, item); err != nil {
+		return err
+	}
 
 	if _, err := io.Copy(out, in); err != nil {
 		return err
@@ -80,7 +114,7 @@ func copyDirectory(src, dst string, item data.Item) error {
 			return os.MkdirAll(dstPath, info.Mode())
 		}
 
-		return copyFile(path, dstPath, item)
+		return copyFile(item, path, dstPath)
 	})
 
 	return err

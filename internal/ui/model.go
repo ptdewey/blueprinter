@@ -1,4 +1,4 @@
-package model
+package ui
 
 import (
 	"fmt"
@@ -7,7 +7,6 @@ import (
 
 	"github.com/ptdewey/blueprinter/internal/data"
 	"github.com/ptdewey/blueprinter/internal/handler"
-	"github.com/ptdewey/blueprinter/internal/ui"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
@@ -49,6 +48,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 
+			// REFACTOR: this could be moved to a cli module to support non tui cli tool
 			var dst string
 			if len(os.Args) < 2 {
 				cwd, err := os.Getwd()
@@ -66,43 +66,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				dst = os.Args[1]
 			}
 
-			if err := handler.CopySelectedItem(item.Path(), dst, item); err != nil {
+			if err := handler.CopySelectedItem(item, item.Path(), dst); err != nil {
 				fmt.Println("Error copying selected item:", err)
 				return m, nil
-			}
-
-			// Copy any extra specified template files
-			for _, et := range item.Blueprint().Extras {
-				if et.TargetTemplate != item.Title() {
-					continue
-				}
-
-				cwd, err := os.Getwd()
-				if err != nil {
-					fmt.Println("Error getting current working directory: ", err)
-					return m, nil
-				}
-
-				for i, t := range et.ExtraTemplates {
-					var dst string
-					if len(et.ExtraDestinations) > i && et.ExtraDestinations[i] != "" {
-						dst = filepath.Join(cwd, et.ExtraDestinations[i])
-					} else {
-						dst = filepath.Join(cwd, t)
-					}
-
-					src := filepath.Join(item.DirPath(), t)
-					if err := handler.CopySelectedItem(src, dst, item); err != nil {
-						fmt.Println("Error copying additional template files for selected item:", err)
-						return m, nil
-					}
-				}
 			}
 
 			return m, tea.Quit
 		}
 	case tea.WindowSizeMsg:
-		h, v := ui.BlueprinterStyle.GetFrameSize()
+		h, v := blueprinterStyle.GetFrameSize()
 		m.List.SetSize(msg.Width-h, msg.Height-v)
 	}
 
@@ -113,5 +85,5 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-	return ui.BlueprinterStyle.Render(m.List.View())
+	return blueprinterStyle.Render(m.List.View())
 }

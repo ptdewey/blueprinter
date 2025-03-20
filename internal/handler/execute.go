@@ -9,12 +9,13 @@ import (
 	"github.com/ptdewey/blueprinter/internal/utils"
 )
 
-// NOTE: Special reserved template variables
+// Special reserved template variables
 var templateVars = map[string]any{
 	"current_year": time.Now().Year(),
+	// Expand as necessary
 }
 
-func handleTemplatePopulation(in *io.Reader, tmplPath string, item data.Item) error {
+func execTemplate(in *io.Reader, tmplPath string, item data.Item) error {
 	cfg := config.Config()
 	if !cfg.PopulateTemplates {
 		return nil
