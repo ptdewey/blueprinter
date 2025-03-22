@@ -2,11 +2,9 @@ package ui
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 
 	"github.com/ptdewey/blueprinter/internal/data"
-	"github.com/ptdewey/blueprinter/internal/handler"
+	"github.com/ptdewey/blueprinter/pkg"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
@@ -15,6 +13,7 @@ import (
 type Model struct {
 	List            list.Model
 	TemplateSources []string
+	Output          string
 }
 
 func (m Model) Init() tea.Cmd {
@@ -48,26 +47,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 
-			// REFACTOR: this could be moved to a cli module to support non tui cli tool
-			var dst string
-			if len(os.Args) < 2 {
-				cwd, err := os.Getwd()
-				if err != nil {
-					fmt.Println("Error getting current working directory: ", err)
-					return m, nil
-				}
-
-				if item.OutputName() == "" {
-					dst = filepath.Join(cwd, item.Title())
-				} else {
-					dst = filepath.Join(cwd, item.OutputName())
-				}
-			} else {
-				dst = os.Args[1]
-			}
-
-			if err := handler.CopySelectedItem(item, item.Path(), dst); err != nil {
-				fmt.Println("Error copying selected item:", err)
+			if err := pkg.CopyItem(&item, m.Output); err != nil {
 				return m, nil
 			}
 

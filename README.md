@@ -37,8 +37,16 @@ blueprinter
 To specify an output location, add an argument for the desired output location.
 
 ```bash
-# add selected template to the 'example' directory
-./blueprinter ./example
+# Place output at foo.go
+./blueprinter -o foo.go
+```
+
+Blueprinter can also be run in CLI mode (no TUI), by passing the `-i` flag with the name or path belonging to a template file.
+If a name is passed, Blueprinter will be search subdirectories for matching files, but will error out if there are multiple matches. (This behavior may change in the future)
+
+```bash
+# Use template called 'flake.nix'
+./blueprinter -i flake.nix
 ```
 
 ## Configuration
