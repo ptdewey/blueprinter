@@ -24,7 +24,7 @@ func MatchItem(items []list.Item, name string) (*data.Item, error) {
 	}
 
 	if len(matches) == 0 {
-		return nil, fmt.Errorf("Failed to find matching template with name '%s'.\n", name)
+		return nil, fmt.Errorf("Failed to find matching template with name '%s'\n", name)
 	} else if len(matches) == 1 {
 		return &matches[0], nil
 	}
@@ -33,7 +33,7 @@ func MatchItem(items []list.Item, name string) (*data.Item, error) {
 	return nil, fmt.Errorf("Found more than one matching item with name '%s'.\n%v\n", name, matches)
 }
 
-func CopyItem(item *data.Item, dst string) error {
+func CopyItem(item *data.Item, dst string, verbose bool) error {
 	if dst == "" {
 		cwd, err := os.Getwd()
 		if err != nil {
@@ -51,6 +51,10 @@ func CopyItem(item *data.Item, dst string) error {
 	if err := handler.CopySelectedItem(*item, item.Path(), dst); err != nil {
 		fmt.Println("Error copying selected item:", err)
 		return err
+	}
+
+	if verbose {
+		fmt.Println(dst)
 	}
 
 	return nil

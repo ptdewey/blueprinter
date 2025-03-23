@@ -10,10 +10,15 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+type Flags struct {
+	Output  string
+	Verbose bool
+}
+
 type Model struct {
 	List            list.Model
 	TemplateSources []string
-	Output          string
+	Flags           Flags
 }
 
 func (m Model) Init() tea.Cmd {
@@ -47,7 +52,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 
-			if err := pkg.CopyItem(&item, m.Output); err != nil {
+			if err := pkg.CopyItem(&item, m.Flags.Output, m.Flags.Verbose); err != nil {
 				return m, nil
 			}
 

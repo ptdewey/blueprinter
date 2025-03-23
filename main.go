@@ -15,8 +15,9 @@ import (
 )
 
 var (
-	input  string
-	output string
+	input   string
+	dst     string
+	verbose bool
 )
 
 func main() {
@@ -25,7 +26,8 @@ func main() {
 	items := data.GetItems(cfg.TemplateSources)
 
 	flag.StringVar(&input, "i", "", "-i <path-to-input-file>")
-	flag.StringVar(&output, "o", "", "-o <path-to-output-file>")
+	flag.StringVar(&dst, "o", "", "-o <path-to-output-file>")
+	flag.BoolVar(&verbose, "v", false, "-v")
 	flag.Parse()
 
 	// Determine if Blueprinter should run in CLI or TUI mode
@@ -33,7 +35,10 @@ func main() {
 		m := ui.Model{
 			List:            list.New(items, list.NewDefaultDelegate(), 0, 0),
 			TemplateSources: cfg.TemplateSources,
-			Output:          output,
+			Flags: ui.Flags{
+				Output:  dst,
+				Verbose: verbose,
+			},
 		}
 		m.List.Title = "Available Templates"
 
@@ -52,7 +57,7 @@ func main() {
 				return
 			}
 
-			if err := pkg.CopyItem(item, output); err != nil {
+			if err := pkg.CopyItem(item, dst, verbose); err != nil {
 				fmt.Println(err)
 			}
 		} else {
@@ -62,7 +67,7 @@ func main() {
 				return
 			}
 
-			if err := pkg.CopyItem(item, output); err != nil {
+			if err := pkg.CopyItem(item, dst, verbose); err != nil {
 				fmt.Println(err)
 			}
 		}
