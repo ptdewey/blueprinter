@@ -7,9 +7,11 @@ import (
 	"path/filepath"
 
 	"github.com/ptdewey/blueprinter/internal/data"
+	"github.com/ptdewey/blueprinter/internal/utils"
 )
 
-func CopySelectedItem(item data.Item, src string, dst string) error {
+// FIX: Errors with outputs without filename `-o ./test/` (force doesn't override)
+func CopySelectedItem(item data.Item, src string, dst string, force bool) error {
 	srcInfo, err := os.Stat(src)
 	if err != nil {
 		fmt.Println("Error getting source info: ", err)
@@ -17,26 +19,26 @@ func CopySelectedItem(item data.Item, src string, dst string) error {
 	}
 
 	if srcInfo.IsDir() {
-		if err := copyDirectory(src, dst, item); err != nil {
+		if err := copyDirectory(item, src, dst, force); err != nil {
 			fmt.Println("Error copying directory: ", err)
 			return err
 		}
 		return nil
 	}
 
-	if err := copyFile(item, src, dst); err != nil {
+	if err := copyFile(item, src, dst, force); err != nil {
 		fmt.Println("Error copying file: ", err)
 		return err
 	}
 
-	if err := copyExtraItems(item); err != nil {
+	if err := copyExtraItems(item, force); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func copyExtraItems(item data.Item) error {
+func copyExtraItems(item data.Item, force bool) error {
 	for _, et := range item.Blueprint().Extras {
 		if et.TargetTemplate != item.Title() {
 			continue
@@ -57,7 +59,7 @@ func copyExtraItems(item data.Item) error {
 			}
 
 			src := filepath.Join(item.DirPath(), t)
-			if err := copyFile(item, src, dst); err != nil {
+			if err := copyFile(item, src, dst, force); err != nil {
 				fmt.Println("Error copying additional template files for selected item:", err)
 				return err
 			}
@@ -66,7 +68,11 @@ func copyExtraItems(item data.Item) error {
 	return nil
 }
 
-func copyFile(item data.Item, src string, dst string) error {
+func copyFile(item data.Item, src string, dst string, force bool) error {
+	if utils.CheckFileExists(dst) && !force {
+		return fmt.Errorf("Error: File '%s' already exists.", dst)
+	}
+
 	var in io.Reader
 	in, err := os.Open(src)
 	if err != nil {
@@ -74,8 +80,6 @@ func copyFile(item data.Item, src string, dst string) error {
 	}
 	defer in.(*os.File).Close()
 
-	// FIX: this currently overwrites the file if it already exists
-	// - Should it stop and warn the user? Config option?
 	out, err := os.Create(dst)
 	if err != nil {
 		return err
@@ -93,7 +97,7 @@ func copyFile(item data.Item, src string, dst string) error {
 	return out.Sync()
 }
 
-func copyDirectory(src, dst string, item data.Item) error {
+func copyDirectory(item data.Item, src string, dst string, force bool) error {
 	err := os.MkdirAll(dst, os.ModePerm)
 	if err != nil {
 		return err
@@ -114,7 +118,7 @@ func copyDirectory(src, dst string, item data.Item) error {
 			return os.MkdirAll(dstPath, info.Mode())
 		}
 
-		return copyFile(item, path, dstPath)
+		return copyFile(item, path, dstPath, force)
 	})
 
 	return err

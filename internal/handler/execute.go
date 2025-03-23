@@ -1,7 +1,10 @@
 package handler
 
 import (
+	"fmt"
 	"io"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/ptdewey/blueprinter/internal/config"
@@ -38,6 +41,14 @@ func execTemplate(in *io.Reader, tmplPath string, item data.Item) error {
 	}
 
 	if templateVars != nil {
+		dir, _ := os.Getwd()
+		templateVars["dir"] = filepath.Base(dir)
+		// FIX: parentDir only seems to work some of the time
+		templateVars["parentDir"] = filepath.Base(filepath.Dir(dir))
+
+		year, month, day := time.Now().Date()
+		templateVars["date"] = fmt.Sprintf("%s %d, %d", month, day, year)
+
 		var err error
 		*in, err = data.ExecuteTemplate(tmplPath, templateVars)
 		if err != nil {

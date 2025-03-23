@@ -11,8 +11,10 @@ import (
 )
 
 type Flags struct {
-	Output  string
-	Verbose bool
+	Output    string
+	Verbose   bool
+	NoCopy    bool
+	ForceCopy bool
 }
 
 type Model struct {
@@ -52,7 +54,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 
-			if err := pkg.CopyItem(&item, m.Flags.Output, m.Flags.Verbose); err != nil {
+			if err := pkg.CopyItem(&item, m.Flags.Output, m.Flags.ForceCopy, m.Flags.Verbose); err != nil {
 				return m, nil
 			}
 

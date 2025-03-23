@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/ptdewey/blueprinter/internal/data"
@@ -24,7 +25,7 @@ func MatchItem(items []list.Item, name string) (*data.Item, error) {
 	}
 
 	if len(matches) == 0 {
-		return nil, fmt.Errorf("Failed to find matching template with name '%s'\n", name)
+		return nil, fmt.Errorf("Error: Failed to find matching template with name '%s'\n", name)
 	} else if len(matches) == 1 {
 		return &matches[0], nil
 	}
@@ -33,22 +34,32 @@ func MatchItem(items []list.Item, name string) (*data.Item, error) {
 	return nil, fmt.Errorf("Found more than one matching item with name '%s'.\n%v\n", name, matches)
 }
 
-func CopyItem(item *data.Item, dst string, verbose bool) error {
-	if dst == "" {
+func TargetPath(item *data.Item, dst string) (string, error) {
+	if dst == "" || (strings.HasSuffix(dst, "/") && !filepath.IsAbs(dst)) {
 		cwd, err := os.Getwd()
 		if err != nil {
 			fmt.Println("Error getting current working directory: ", err)
-			return err
+			return "", err
 		}
 
 		if item.OutputName() == "" {
-			dst = filepath.Join(cwd, item.Title())
+			dst = filepath.Join(cwd, dst, item.Title())
 		} else {
-			dst = filepath.Join(cwd, item.OutputName())
+			dst = filepath.Join(cwd, dst, item.OutputName())
 		}
 	}
 
-	if err := handler.CopySelectedItem(*item, item.Path(), dst); err != nil {
+	return dst, nil
+}
+
+func CopyItem(item *data.Item, dst string, force bool, verbose bool) error {
+	var err error
+	dst, err = TargetPath(item, dst)
+	if err != nil {
+		return err
+	}
+
+	if err := handler.CopySelectedItem(*item, item.Path(), dst, force); err != nil {
 		fmt.Println("Error copying selected item:", err)
 		return err
 	}

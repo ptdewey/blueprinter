@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/toml"
+	"github.com/ptdewey/blueprinter/internal/utils"
 )
 
 var (
@@ -75,7 +76,7 @@ func ParseConfig() *BlueprinterConfig {
 
 func findConfigurationFile() (string, error) {
 	configPath := "blueprinter.toml"
-	if checkFileExists(configPath) {
+	if utils.CheckFileExists(configPath) {
 		return configPath, nil
 	}
 
@@ -85,7 +86,7 @@ func findConfigurationFile() (string, error) {
 	if err == nil {
 		for _, f := range config_files {
 			configPath := filepath.Join(gr, f)
-			if checkFileExists(configPath) {
+			if utils.CheckFileExists(configPath) {
 				return configPath, nil
 			}
 		}
@@ -98,7 +99,7 @@ func findConfigurationFile() (string, error) {
 	}
 	for _, f := range config_files {
 		configPath := filepath.Join(home, ".config", "blueprinter", f)
-		if checkFileExists(configPath) {
+		if utils.CheckFileExists(configPath) {
 			return configPath, nil
 		}
 	}
@@ -119,13 +120,6 @@ func findGitRoot() (string, error) {
 	gitRoot := strings.TrimSpace(string(out))
 
 	return gitRoot, nil
-}
-
-func checkFileExists(configPath string) bool {
-	if info, err := os.Stat(configPath); err == nil {
-		return !info.IsDir()
-	}
-	return false
 }
 
 func defaultConfig() *BlueprinterConfig {
