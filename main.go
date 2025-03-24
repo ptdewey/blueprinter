@@ -24,7 +24,15 @@ func main() {
 	verbose := flag.Bool("v", false, "Print output path (verbose)")
 	force := flag.Bool("f", false, "Force creation of new file")
 	noCopy := flag.Bool("no-copy", false, "Do not create new file, output target path")
+	dumpList := flag.Bool("dump-list", false, "Dump list contents to stdout")
 	flag.Parse()
+
+	if *dumpList {
+		for _, item := range items {
+			fmt.Println(item.(data.Item).Path())
+		}
+		return
+	}
 
 	// Determine if Blueprinter should run in CLI or TUI mode
 	if len(flag.Args()) < 1 && *input == "" {
