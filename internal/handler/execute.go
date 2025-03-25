@@ -10,6 +10,7 @@ import (
 	"github.com/ptdewey/blueprinter/internal/config"
 	"github.com/ptdewey/blueprinter/internal/data"
 	"github.com/ptdewey/blueprinter/internal/utils"
+	"github.com/ptdewey/blueprinter/pkg/flags"
 )
 
 // Special reserved template variables
@@ -45,6 +46,12 @@ func execTemplate(in *io.Reader, tmplPath string, item data.Item) error {
 		templateVars["dir"] = filepath.Base(dir)
 		// FIX: parentDir only seems to work some of the time
 		templateVars["parentDir"] = filepath.Base(filepath.Dir(dir))
+
+		templateVars["id"] = flags.BlueprinterFlags.ID
+		if flags.BlueprinterFlags.ID == "" {
+			templateVars["id"] = item.OutputName()
+		}
+		templateVars["tags"] = flags.BlueprinterFlags.Tags
 
 		year, month, day := time.Now().Date()
 		templateVars["date"] = fmt.Sprintf("%s %d, %d", month, day, year)

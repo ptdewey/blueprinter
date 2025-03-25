@@ -5,22 +5,15 @@ import (
 
 	"github.com/ptdewey/blueprinter/internal/data"
 	"github.com/ptdewey/blueprinter/pkg"
+	"github.com/ptdewey/blueprinter/pkg/flags"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type Flags struct {
-	Output    string
-	Verbose   bool
-	NoCopy    bool
-	ForceCopy bool
-}
-
 type Model struct {
 	List            list.Model
 	TemplateSources []string
-	Flags           Flags
 }
 
 func (m Model) Init() tea.Cmd {
@@ -54,7 +47,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 
-			if err := pkg.CopyItem(&item, m.Flags.Output, m.Flags.ForceCopy, m.Flags.Verbose); err != nil {
+			if err := pkg.CopyItem(&item, flags.BlueprinterFlags.Output, flags.BlueprinterFlags.Force, flags.BlueprinterFlags.Verbose); err != nil {
 				return m, nil
 			}
 
